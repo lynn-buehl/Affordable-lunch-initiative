@@ -1,0 +1,146 @@
+/*
+ * palette.css is generated from @radix-ui/colors (accessible, hand-designed
+ * 12-step scales) with selectors rewritten from `.light`/`.dark` classes to
+ * our [data-mode] attribute. Regenerate it if presets.ts adds/removes a
+ * color scale — see the command in palette.css's own header comment.
+ */
+@import "./palette.css";
+
+:root {
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-color: 220 40% 2%;
+  --shadow-sm: 0 1px 2px hsl(var(--shadow-color) / 0.16);
+  --shadow-md: 0 4px 16px hsl(var(--shadow-color) / 0.18);
+  --shadow-lg: 0 12px 40px hsl(var(--shadow-color) / 0.22);
+}
+
+/* Neutral surface/text/border tokens: driven only by data-mode, shared by
+   every accent preset. */
+[data-mode] {
+  --bg: var(--gray-1);
+  --bg-elevated: var(--gray-2);
+  --bg-hover: var(--gray-3);
+  --bg-active: var(--gray-4);
+  --border: var(--gray-6);
+  --border-strong: var(--gray-8);
+  --text: var(--gray-12);
+  --text-muted: var(--gray-11);
+  --text-subtle: var(--gray-9);
+
+  /* Status (success/error messages, badges) — kept separate from the
+     financial/chart diverging pair below per dataviz guidance: status
+     colors are reserved and not reused as a series/measure encoding. */
+  --positive: var(--green-11);
+  --positive-bg: var(--green-3);
+  --positive-border: var(--green-7);
+  --negative: var(--red-11);
+  --negative-bg: var(--red-3);
+  --negative-border: var(--red-7);
+
+  /* Financial/karma diverging pair (blue/red, not red/green): red/green is
+     a classic CVD confusion pair, validated with scripts/validate_palette.js
+     from the dataviz skill — red/green FAILed CVD separation, blue/red
+     passes cleanly in both modes. -text is step 11 (>=4.5:1 on body text),
+     -chart is step 9 (validated chart-mark fill against both surfaces). */
+  --balance-positive-text: var(--blue-11);
+  --balance-negative-text: var(--red-11);
+  --balance-positive-chart: var(--blue-9);
+  --balance-negative-chart: var(--red-9);
+}
+
+/* Accent presets: each maps the semantic --accent-N scale onto one of the
+   imported radix color scales. Adding a preset here + in presets.ts is the
+   only step needed to add a new theme option. */
+[data-accent="slate"] {
+  --accent-1: var(--slate-1);
+  --accent-2: var(--slate-2);
+  --accent-3: var(--slate-3);
+  --accent-4: var(--slate-4);
+  --accent-5: var(--slate-5);
+  --accent-6: var(--slate-6);
+  --accent-7: var(--slate-7);
+  --accent-8: var(--slate-8);
+  --accent-9: var(--slate-9);
+  --accent-10: var(--slate-10);
+  --accent-11: var(--slate-11);
+  --accent-12: var(--slate-12);
+  --accent-contrast: white;
+}
+
+[data-accent="forest"] {
+  --accent-1: var(--grass-1);
+  --accent-2: var(--grass-2);
+  --accent-3: var(--grass-3);
+  --accent-4: var(--grass-4);
+  --accent-5: var(--grass-5);
+  --accent-6: var(--grass-6);
+  --accent-7: var(--grass-7);
+  --accent-8: var(--grass-8);
+  --accent-9: var(--grass-9);
+  --accent-10: var(--grass-10);
+  --accent-11: var(--grass-11);
+  --accent-12: var(--grass-12);
+  --accent-contrast: white;
+}
+
+[data-accent="plum"] {
+  --accent-1: var(--plum-1);
+  --accent-2: var(--plum-2);
+  --accent-3: var(--plum-3);
+  --accent-4: var(--plum-4);
+  --accent-5: var(--plum-5);
+  --accent-6: var(--plum-6);
+  --accent-7: var(--plum-7);
+  --accent-8: var(--plum-8);
+  --accent-9: var(--plum-9);
+  --accent-10: var(--plum-10);
+  --accent-11: var(--plum-11);
+  --accent-12: var(--plum-12);
+  --accent-contrast: white;
+}
+
+[data-accent="amber"] {
+  --accent-1: var(--amber-1);
+  --accent-2: var(--amber-2);
+  --accent-3: var(--amber-3);
+  --accent-4: var(--amber-4);
+  --accent-5: var(--amber-5);
+  --accent-6: var(--amber-6);
+  --accent-7: var(--amber-7);
+  --accent-8: var(--amber-8);
+  --accent-9: var(--amber-9);
+  --accent-10: var(--amber-10);
+  --accent-11: var(--amber-11);
+  --accent-12: var(--amber-12);
+  --accent-contrast: black;
+}
+
+[data-accent="ocean"] {
+  --accent-1: var(--teal-1);
+  --accent-2: var(--teal-2);
+  --accent-3: var(--teal-3);
+  --accent-4: var(--teal-4);
+  --accent-5: var(--teal-5);
+  --accent-6: var(--teal-6);
+  --accent-7: var(--teal-7);
+  --accent-8: var(--teal-8);
+  --accent-9: var(--teal-9);
+  --accent-10: var(--teal-10);
+  --accent-11: var(--teal-11);
+  --accent-12: var(--teal-12);
+  --accent-contrast: white;
+}
+
+/* Semantic aliases components should use, resolved from whichever accent's
+   --accent-N won the cascade above. */
+[data-mode] {
+  --accent-solid: var(--accent-9);
+  --accent-solid-hover: var(--accent-10);
+  --accent-text: var(--accent-11);
+  --accent-bg-subtle: var(--accent-3);
+  --accent-bg-hover: var(--accent-4);
+  --accent-border: var(--accent-7);
+  --focus-ring: var(--accent-8);
+}

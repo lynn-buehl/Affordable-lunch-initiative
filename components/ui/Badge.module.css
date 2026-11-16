@@ -1,0 +1,29 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.accent {
+  background-color: var(--accent-bg-subtle);
+  color: var(--accent-text);
+}
+
+.positive {
+  background-color: var(--positive-bg);
+  color: var(--positive);
+}
+
+.negative {
+  background-color: var(--negative-bg);
+  color: var(--negative);
+}
+
+.neutral {
+  background-color: var(--bg-hover);
+  color: var(--text-subtle);
+}

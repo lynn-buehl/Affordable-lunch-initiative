@@ -1,0 +1,147 @@
+.hero {
+  position: relative;
+  padding: 32px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background-color: var(--bg-elevated);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.kicker {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent-text);
+}
+
+.title {
+  font-size: 38px;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.lede {
+  margin: 10px 0 0;
+  color: var(--text-muted);
+  max-width: 52ch;
+}
+
+.heroActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+
+.sectionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.sectionTitle {
+  font-size: 16px;
+}
+
+.sectionLink {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.sectionHint {
+  margin: 0 0 18px;
+  font-size: 13px;
+  color: var(--text-subtle);
+}
+
+.board {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.boardRow {
+  border-top: 1px solid var(--border);
+}
+
+.boardRow:first-child {
+  border-top: none;
+}
+
+.boardLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 6px;
+  margin: 0 -6px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: inherit;
+  font-size: 14px;
+}
+
+.boardLink:hover {
+  background-color: var(--bg-hover);
+}
+
+.boardRank {
+  width: 20px;
+  text-align: right;
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--text-subtle);
+}
+
+.boardName {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.boardMe {
+  font-weight: 400;
+  color: var(--text-subtle);
+}
+
+.boardValue {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.positive {
+  color: var(--balance-positive-text);
+}
+
+.negative {
+  color: var(--balance-negative-text);
+}
+
+@media (max-width: 760px) {
+  .hero {
+    padding: 22px;
+  }
+
+  .title {
+    font-size: 30px;
+  }
+}

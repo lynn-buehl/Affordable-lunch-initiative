@@ -1,0 +1,98 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.chartArea {
+  position: relative;
+}
+
+.row {
+  cursor: pointer;
+}
+
+.row:focus-visible rect {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.rowLabel {
+  fill: var(--text);
+  font-size: 13px;
+  font-family: var(--font-sans);
+}
+
+.rowLabelSelected {
+  font-weight: 700;
+}
+
+.valueLabel {
+  fill: var(--text-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-sans);
+}
+
+.bar {
+  transition: opacity 120ms ease;
+}
+
+.row:hover .bar,
+.row:focus-visible .bar {
+  opacity: 0.82;
+}
+
+.tooltip {
+  position: absolute;
+  pointer-events: none;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 12px;
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+  z-index: 5;
+  transform: translate(-50%, -110%);
+}
+
+.tooltipValue {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.tooltipLabel {
+  color: var(--text-muted);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}

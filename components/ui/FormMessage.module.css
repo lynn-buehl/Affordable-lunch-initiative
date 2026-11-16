@@ -1,0 +1,18 @@
+.message {
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px;
+  border: 1px solid transparent;
+}
+
+.error {
+  background-color: var(--negative-bg);
+  border-color: var(--negative-border);
+  color: var(--negative);
+}
+
+.success {
+  background-color: var(--positive-bg);
+  border-color: var(--positive-border);
+  color: var(--positive);
+}

@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ali
+      POSTGRES_PASSWORD: ali
+      POSTGRES_DB: ali
+    ports:
+      - "5432:5432"
+    volumes:
+      - ali-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  ali-postgres-data:

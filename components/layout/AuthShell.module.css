@@ -1,0 +1,28 @@
+.shell {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.inner {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.brand {
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: 44px;
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  background: linear-gradient(135deg, var(--accent-11), var(--accent-9));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

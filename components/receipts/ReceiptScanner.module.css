@@ -1,0 +1,241 @@
+.drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 28px 20px;
+  border-radius: var(--radius-md);
+  border: 2px dashed var(--border-strong);
+  background-color: var(--bg);
+  color: var(--text-muted);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.drop:hover:not(:disabled) {
+  border-color: var(--accent-border);
+  background-color: var(--accent-bg-subtle);
+  color: var(--accent-text);
+}
+
+.drop:disabled {
+  cursor: progress;
+  opacity: 0.8;
+}
+
+.dropTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.dropHint {
+  font-size: 13px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+  animation: spin 900ms linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation: none;
+  }
+}
+
+.review {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-areas:
+    "name price remove"
+    "match match match";
+  align-items: center;
+  gap: 6px 12px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  background-color: var(--bg);
+}
+
+.line:first-child {
+  border-top: none;
+}
+
+.lineName {
+  grid-area: name;
+  min-width: 0;
+}
+
+.lineTitle {
+  display: block;
+  font-weight: 600;
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lineRaw {
+  display: block;
+  font-size: 12px;
+  color: var(--text-subtle);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.linePrice {
+  grid-area: price;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.remove {
+  grid-area: remove;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--text-subtle);
+  cursor: pointer;
+}
+
+.remove:hover {
+  background-color: var(--negative-bg);
+  color: var(--negative);
+}
+
+.match {
+  grid-area: match;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background-color: var(--bg-elevated);
+  font-size: 13px;
+}
+
+.matched {
+  border-color: var(--accent-border);
+  background-color: var(--accent-bg-subtle);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.warning {
+  color: var(--negative);
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.checkbox input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent-solid);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Saved receipts */
+.saved {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.savedHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+
+.savedHead strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.savedMeta {
+  color: var(--text-subtle);
+  font-size: 13px;
+}
+
+.savedItems {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  font-size: 14px;
+}
+
+.savedItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+}
+
+.savedItem span:last-child {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.other {
+  color: var(--text-subtle);
+}
