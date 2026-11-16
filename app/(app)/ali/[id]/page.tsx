@@ -23,6 +23,15 @@ import { getReceiptsForEvent } from "@/lib/db/queries/receipts";
 import { isReceiptScanningConfigured } from "@/lib/receipts/extract";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
+import { ReviewForm } from "@/components/ali/ReviewForm";
+import { ReviewSummaryView } from "@/components/ali/ReviewSummaryView";
+import {
+  getPreviousReviewedEventId,
+  getReviewSummary,
+  getReviewsByUser,
+} from "@/lib/db/queries/forecast";
+import { db } from "@/lib/db";
+import { ingredients as ingredientsTable } from "@/lib/db/schema";
 
 const STATUS_LABEL: Record<string, string> = {
   voting: "Voting open",
@@ -64,6 +73,22 @@ export default async function AliEventPage({
     event.status === "cancelled" ? [] : getShoppingList(id),
     showShoppingList ? getReceiptsForEvent(id) : [],
   ]);
+  // Reviews: of this ALI once it's finished; of the previous one while this
+  // one is being planned, so its lessons are in front of whoever shops next.
+  const reviewedEventId =
+    event.status === "completed" ? id : await getPreviousReviewedEventId(id);
+  const [reviewSummary, myReview, allIngredientNames] = await Promise.all([
+    reviewedEventId ? getReviewSummary(reviewedEventId) : undefined,
+    event.status === "completed" && optedIn === true
+      ? getReviewsByUser(id, session.user.id)
+      : undefined,
+    // Includes retired ingredients, which can still appear in old reviews.
+    db.select({ id: ingredientsTable.id, name: ingredientsTable.name }).from(ingredientsTable),
+  ]);
+  const ingredientNames = new Map(allIngredientNames.map((i) => [i.id, i.name]));
+  const hasReviews =
+    reviewSummary && (reviewSummary.tallies.length > 0 || reviewSummary.notes.length > 0);
+
   const manualEntryHref = `/finance/entry?aliEventId=${id}&description=${encodeURIComponent(event.name)}`;
 
   return (
@@ -127,6 +152,17 @@ export default async function AliEventPage({
           </Card>
         ) : null}
 
+        {event.status !== "completed" && event.status !== "cancelled" && hasReviews ? (
+          <Card>
+            <h2 style={{ fontSize: 16, marginBottom: 4 }}>Last time: {reviewSummary.eventName}</h2>
+            <p style={{ margin: "0 0 14px", fontSize: 13, color: "var(--text-subtle)" }}>
+              What people said about the amounts. The list below already buys a bit more or
+              less where they agreed.
+            </p>
+            <ReviewSummaryView summary={reviewSummary} ingredientNames={ingredientNames} />
+          </Card>
+        ) : null}
+
         {event.status === "voting" ? (
           <Card>
             <h2 style={{ fontSize: 16, marginBottom: 4 }}>The list so far</h2>
@@ -177,6 +213,28 @@ export default async function AliEventPage({
                 Log this expense
               </Button>
             </Link>
+          </Card>
+        ) : null}
+
+        {myReview && shoppingList.length > 0 ? (
+          <Card>
+            <h2 style={{ fontSize: 16, marginBottom: 4 }}>How did the amounts work out?</h2>
+            <p style={{ margin: "0 0 14px", fontSize: 13, color: "var(--text-subtle)" }}>
+              Your answers adjust how much is bought next time.
+            </p>
+            <ReviewForm
+              eventId={id}
+              items={shoppingList.map((i) => ({ ingredientId: i.ingredientId, name: i.name }))}
+              verdicts={myReview.verdicts}
+              note={myReview.note}
+            />
+          </Card>
+        ) : null}
+
+        {event.status === "completed" && hasReviews ? (
+          <Card>
+            <h2 style={{ fontSize: 16, marginBottom: 14 }}>What everyone said</h2>
+            <ReviewSummaryView summary={reviewSummary} ingredientNames={ingredientNames} />
           </Card>
         ) : null}
 

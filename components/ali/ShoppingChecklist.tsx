@@ -99,6 +99,13 @@ export function ShoppingChecklist({
                   {item.quantity} wanted
                   {item.packageSize > 1 ? ` · ${item.packageSize} per pack` : ""}
                 </span>
+                {item.reviewAdjustment ? (
+                  <span className={styles.adjusted}>
+                    {item.reviewAdjustment === "more"
+                      ? "Buying extra: reviews said there was too little"
+                      : "Buying less: reviews said there was too much"}
+                  </span>
+                ) : null}
               </span>
               <span className={styles.amount} aria-label={`Buy ${item.packagesToBuy}`}>
                 {item.packagesToBuy}×

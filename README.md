@@ -79,6 +79,39 @@ DATABASE_URL=... npm run dev &
 npm run test:e2e
 ```
 
+## Forecast and reviews
+
+When someone opts into an ALI, their vote is pre-filled with what they will
+probably want, and they can change anything. Two terms go into it
+(`lib/ali/forecast.ts`, tested in `tests/unit/forecast.test.ts`):
+
+- **Personal preference**: a recency-weighted average of what that person
+  picked at their last 8 ALIs (each older ALI counts 0.7x the next), plus
+  their standing order as one extra observation. Anything they'd more likely
+  than not pick is pre-filled at the rounded amount.
+- **Reviews**: after an ALI is completed, everyone who took part can mark
+  each ingredient "too little / just right / too much" and leave a note. The
+  recent average of those verdicts changes how much is bought next time by
+  up to 25% either way, and the shopping list says so on the affected line.
+  The notes and tallies are shown on the next ALI's page.
+
+It is a transparent weighted formula, not a fitted regression: with a few
+ALIs per person there isn't enough data to fit one honestly. The weights are
+constants at the top of `lib/ali/forecast.ts`.
+
+`npm run seed:ingredients` adds the group's usual shopping items to the
+ingredient list (safe to run again).
+
+## Security
+
+- Passwords are stored as Argon2id hashes; invite and reset links are
+  single-use, expire, and are stored hashed.
+- No public sign-up: only an admin can add members.
+- Sign-in, password-reset emails and receipt scans are throttled.
+- Every page and action re-checks the account in the database, so someone
+  marked as "left" loses access at once.
+- Secrets live only in environment variables (`.env` is not in the repo).
+
 ## Trying it with demo data
 
 To see profiles, karma and favourites filled in without waiting for real
@@ -126,7 +159,10 @@ database for accounts, balances and receipt scanning.
    ```bash
    DATABASE_URL="<the Neon connection string>" npm run db:push
    DATABASE_URL="<the Neon connection string>" npm run seed -- "Your Name" you@example.com "a-strong-password"
+   DATABASE_URL="<the Neon connection string>" npm run seed:ingredients
    ```
+   Use your real email and a long, unique password here: this account is
+   reachable from the internet.
 6. Log in and invite everyone else from the Members page.
 
 After that, every `git push` to `main` goes live within a minute or two, and

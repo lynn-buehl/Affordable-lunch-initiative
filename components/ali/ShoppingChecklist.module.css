@@ -127,3 +127,11 @@
   color: var(--positive);
   font-weight: 600;
 }
+
+.adjusted {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-text);
+}

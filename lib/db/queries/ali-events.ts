@@ -6,10 +6,11 @@ import {
   ingredientVotes,
   ingredients,
   shoppingChecks,
-  userIngredientDefaults,
   users,
   type AliEvent,
 } from "@/lib/db/schema";
+import { getPrefillForUser, getReviewFactors } from "@/lib/db/queries/forecast";
+import { packagesToBuy } from "@/lib/ali/forecast";
 
 export type AliEventWithOrganizer = AliEvent & {
   organizerName: string;
@@ -93,8 +94,9 @@ export async function getParticipation(
 
 /**
  * Opts a user in/out of an event. On a user's first opt-in, pre-fills their
- * vote from their standing default ingredients (lib/db/queries/ingredients.ts)
- * rather than leaving them to re-pick every time.
+ * vote with what they'll probably want: a forecast from their standing order
+ * and what they picked at recent ALIs (lib/ali/forecast.ts), rather than
+ * leaving them to re-pick every time. They can change anything afterwards.
  */
 export async function setParticipation(eventId: string, userId: string, optedIn: boolean) {
   const wasParticipant = await db
@@ -112,20 +114,16 @@ export async function setParticipation(eventId: string, userId: string, optedIn:
     });
 
   if (optedIn && wasParticipant.length === 0) {
-    const defaults = await db
-      .select({ ingredientId: userIngredientDefaults.ingredientId })
-      .from(userIngredientDefaults)
-      .where(eq(userIngredientDefaults.userId, userId));
-
-    if (defaults.length > 0) {
+    const prefill = await getPrefillForUser(userId, eventId);
+    if (prefill.size > 0) {
       await db
         .insert(ingredientVotes)
         .values(
-          defaults.map((d) => ({
+          [...prefill].map(([ingredientId, quantity]) => ({
             aliEventId: eventId,
             userId,
-            ingredientId: d.ingredientId,
-            quantity: 1,
+            ingredientId,
+            quantity,
           })),
         )
         .onConflictDoNothing();
@@ -195,9 +193,14 @@ export type ShoppingListItem = {
   packageSize: number;
   packagesToBuy: number;
   checked: boolean;
+  /** Set when reviews of earlier ALIs changed how many packs to buy. */
+  reviewAdjustment: "more" | "less" | null;
 };
 
-/** Requested quantities among opted-in participants, rounded up to packages to buy. */
+/**
+ * Requested quantities among opted-in participants, nudged by reviews of
+ * earlier ALIs, rounded up to packages to buy.
+ */
 export async function getShoppingList(eventId: string): Promise<ShoppingListItem[]> {
   const rows = await db
     .select({
@@ -220,10 +223,16 @@ export async function getShoppingList(eventId: string): Promise<ShoppingListItem
     .groupBy(ingredients.id, ingredients.name, ingredients.packageSize, ingredientVotes.aliEventId)
     .orderBy(ingredients.name);
 
-  return rows.map((r) => ({
-    ...r,
-    packagesToBuy: Math.ceil(r.quantity / r.packageSize),
-  }));
+  const factors = await getReviewFactors(eventId);
+  return rows.map((r) => {
+    const plain = packagesToBuy(r.quantity, r.packageSize, 1);
+    const adjusted = packagesToBuy(r.quantity, r.packageSize, factors.get(r.ingredientId) ?? 1);
+    return {
+      ...r,
+      packagesToBuy: adjusted,
+      reviewAdjustment: adjusted > plain ? "more" : adjusted < plain ? "less" : null,
+    };
+  });
 }
 
 export async function getEmailsOfOptedInParticipants(eventId: string): Promise<

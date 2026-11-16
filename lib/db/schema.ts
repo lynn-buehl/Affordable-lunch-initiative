@@ -27,6 +27,11 @@ export const ledgerEntryTypeEnum = pgEnum("ledger_entry_type", [
   "contribution",
   "expense",
 ]);
+export const reviewVerdictEnum = pgEnum("review_verdict", [
+  "too_little",
+  "just_right",
+  "too_much",
+]);
 export const aliEventStatusEnum = pgEnum("ali_event_status", [
   "voting",
   "shopping",
@@ -262,6 +267,48 @@ export const receiptItems = pgTable("receipt_items", {
     onDelete: "set null",
   }),
 });
+
+// --- Reviews: how did the amounts work out? ---------------------------------
+
+// After an ALI, each participant can say per ingredient whether there was
+// too little, the right amount, or too much. The forecast uses this to nudge
+// how much is bought next time (see lib/ali/forecast.ts).
+export const ingredientReviews = pgTable(
+  "ingredient_reviews",
+  {
+    aliEventId: uuid("ali_event_id")
+      .notNull()
+      .references(() => aliEvents.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    ingredientId: uuid("ingredient_id")
+      .notNull()
+      .references(() => ingredients.id, { onDelete: "cascade" }),
+    verdict: reviewVerdictEnum("verdict").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.aliEventId, table.userId, table.ingredientId] }),
+  ],
+);
+
+// One free-text remark per person per ALI ("the vegetable falafel was a
+// mistake"), shown to the next organizer.
+export const aliReviewNotes = pgTable(
+  "ali_review_notes",
+  {
+    aliEventId: uuid("ali_event_id")
+      .notNull()
+      .references(() => aliEvents.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    note: text("note").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.aliEventId, table.userId] })],
+);
 
 // Fixed-window counters for throttling (login attempts, password-reset
 // emails, receipt scans). Kept in Postgres rather than in memory because the

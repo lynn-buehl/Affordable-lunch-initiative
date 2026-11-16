@@ -29,6 +29,7 @@ import {
 import { shoppingStartedEmailTemplate } from "@/lib/email/templates";
 import { appUrl, emailFrom, sendEmail } from "@/lib/email/resend";
 import { getAllUsers } from "@/lib/db/queries/users";
+import { setIngredientReview, setReviewNote } from "@/lib/db/queries/forecast";
 import type { ActionState } from "@/lib/auth/actions";
 
 async function requireOrganizerOrAdmin(eventId: string) {
@@ -201,4 +202,42 @@ export async function toggleShoppingCheckAction(
     throw new AuthError("This shopping list is closed");
   }
   await setShoppingCheck(eventId, ingredientId, user.id, checked);
+}
+
+const VERDICTS = ["too_little", "just_right", "too_much"] as const;
+
+/** Reviews are for people who ate at an ALI that has finished. */
+async function requireReviewer(eventId: string) {
+  const user = await requireUser();
+  const [event, participation] = await Promise.all([
+    getAliEvent(eventId),
+    getParticipation(eventId, user.id),
+  ]);
+  if (!event || event.status !== "completed" || participation !== true) {
+    throw new AuthError("Only people who took part can review a finished ALI");
+  }
+  return user;
+}
+
+export async function setIngredientReviewAction(
+  eventId: string,
+  ingredientId: string,
+  verdict: string | null,
+) {
+  const user = await requireReviewer(eventId);
+  const valid = VERDICTS.find((v) => v === verdict) ?? null;
+  if (verdict !== null && valid === null) throw new AuthError("Unknown verdict");
+  await setIngredientReview(eventId, user.id, ingredientId, valid);
+}
+
+export async function saveReviewNoteAction(
+  eventId: string,
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const user = await requireReviewer(eventId);
+  const note = String(formData.get("note") ?? "");
+  if (note.length > 500) return { error: "Keep the note under 500 characters." };
+  await setReviewNote(eventId, user.id, note);
+  return { success: note.trim() ? "Note saved." : "Note removed." };
 }
