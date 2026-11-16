@@ -263,6 +263,15 @@ export const receiptItems = pgTable("receipt_items", {
   }),
 });
 
+// Fixed-window counters for throttling (login attempts, password-reset
+// emails, receipt scans). Kept in Postgres rather than in memory because the
+// site runs as short-lived serverless functions that share no memory.
+export const rateLimits = pgTable("rate_limits", {
+  key: text("key").primaryKey(),
+  windowStart: timestamp("window_start", { withTimezone: true }).notNull().defaultNow(),
+  count: integer("count").notNull().default(0),
+});
+
 // No karma_entries table: the confirmed formula (weekly group cost / weekly
 // meals = price per meal; spending is +karma, consuming a meal is -karma) is
 // fully derivable at read time from ledger_entries (money spent) and

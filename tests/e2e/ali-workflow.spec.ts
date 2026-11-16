@@ -37,7 +37,7 @@ test("add an ingredient on the vote screen, vote a quantity, and see the package
   await page.fill("#new-ingredient-package-size", "8");
   await page.fill("#new-ingredient-quantity", "10");
   await page.click('button:has-text("Add & vote")');
-  await expect(page.getByText(ingredientName)).toBeVisible();
+  await expect(page.getByText(ingredientName).first()).toBeVisible();
 
   // Bump the quantity by 2 more via the stepper (10 -> 12).
   await page.click(`button[aria-label="More ${ingredientName}"]`);

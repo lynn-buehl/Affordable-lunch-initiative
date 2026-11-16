@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/rbac";
+import { consumeRateLimit } from "@/lib/auth/rate-limit";
 import { getActiveIngredients } from "@/lib/db/queries/ingredients";
 import { getAliEvent, completeEvent } from "@/lib/db/queries/ali-events";
 import { saveReceiptWithExpense } from "@/lib/db/queries/receipts";
@@ -15,7 +16,7 @@ export type ScanResult =
   | { ok: false; error: string };
 
 export async function scanReceiptAction(formData: FormData): Promise<ScanResult> {
-  await requireUser();
+  const user = await requireUser();
 
   const file = formData.get("image");
   if (!(file instanceof File) || file.size === 0) {
@@ -27,6 +28,11 @@ export async function scanReceiptAction(formData: FormData): Promise<ScanResult>
   }
   if (file.size > MAX_IMAGE_BYTES) {
     return { ok: false, error: "That photo is too large. Try again with a smaller one." };
+  }
+
+  // Each scan is a paid API call; cap what one account can spend in a day.
+  if (!(await consumeRateLimit(`scan:${user.id}`, 20, 24 * 60 * 60))) {
+    return { ok: false, error: "You've reached today's limit of 20 scans. Enter the amount by hand." };
   }
 
   const ingredients = await getActiveIngredients();

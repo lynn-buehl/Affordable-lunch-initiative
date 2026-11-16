@@ -18,6 +18,8 @@ const serif = Fraunces({
 export const metadata: Metadata = {
   title: "ALI",
   description: "Shared shopping and finance tracker for the group",
+  // A private tool for one group: keep it out of search engines.
+  robots: { index: false, follow: false },
 };
 
 export default async function RootLayout({

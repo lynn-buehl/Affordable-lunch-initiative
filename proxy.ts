@@ -19,6 +19,9 @@ const PUBLIC_PATHS = [
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Must run for people who still have a session cookie (see the route).
+  if (pathname === "/signed-out") return NextResponse.next();
+
   const isPublic = PUBLIC_PATHS.some((path) => pathname.startsWith(path));
   const session = await auth();
 

@@ -59,9 +59,11 @@ export default async function AliEventPage({
 
   const isOrganizerOrAdmin = session.user.role === "admin" || event.organizerId === session.user.id;
   const showShoppingList = event.status === "shopping" || event.status === "completed";
-  const [shoppingList, receipts] = showShoppingList
-    ? await Promise.all([getShoppingList(id), getReceiptsForEvent(id)])
-    : [[], []];
+  const [shoppingList, receipts] = await Promise.all([
+    // During voting this is a live preview of what everyone has asked for.
+    event.status === "cancelled" ? [] : getShoppingList(id),
+    showShoppingList ? getReceiptsForEvent(id) : [],
+  ]);
   const manualEntryHref = `/finance/entry?aliEventId=${id}&description=${encodeURIComponent(event.name)}`;
 
   return (
@@ -122,6 +124,17 @@ export default async function AliEventPage({
               items={shoppingList}
               readOnly={event.status !== "shopping"}
             />
+          </Card>
+        ) : null}
+
+        {event.status === "voting" ? (
+          <Card>
+            <h2 style={{ fontSize: 16, marginBottom: 4 }}>The list so far</h2>
+            <p style={{ margin: "0 0 16px", fontSize: 13, color: "var(--text-subtle)" }}>
+              What everyone has asked for, rounded up to packs. It keeps changing until the
+              organizer starts shopping.
+            </p>
+            <ShoppingChecklist eventId={id} items={shoppingList} readOnly />
           </Card>
         ) : null}
 

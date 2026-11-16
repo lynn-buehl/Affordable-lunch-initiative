@@ -21,6 +21,7 @@ import {
   updatePassword,
 } from "@/lib/db/queries/users";
 import { requireUser } from "@/lib/auth/rbac";
+import { clearRateLimit, clientIp, consumeRateLimit } from "@/lib/auth/rate-limit";
 import {
   emailChangeConfirmationTemplate,
   passwordResetEmailTemplate,
@@ -38,6 +39,27 @@ export async function loginAction(
     password: formData.get("password"),
   });
   if (!parsed.success) return { error: "Enter a valid email and password" };
+
+  // Slow down password guessing: per account and per caller address.
+  const emailKey = `login:${parsed.data.email.toLowerCase().trim()}`;
+  const [emailOk, ipOk] = await Promise.all([
+    consumeRateLimit(emailKey, 8, 15 * 60),
+    consumeRateLimit(`login-ip:${await clientIp()}`, 40, 15 * 60),
+  ]);
+  if (!emailOk || !ipOk) {
+    return { error: "Too many sign-in attempts. Wait 15 minutes and try again." };
+  }
+
+  // A correct password shouldn't leave earlier typos counting against the
+  // account, so check it first and clear the counter on success.
+  const candidate = await getUserByEmail(parsed.data.email);
+  if (
+    candidate?.passwordHash &&
+    candidate.status === "active" &&
+    (await verifyPassword(candidate.passwordHash, parsed.data.password))
+  ) {
+    await clearRateLimit(emailKey);
+  }
 
   try {
     await signIn("credentials", {
@@ -88,6 +110,14 @@ export async function requestPasswordResetAction(
     success: "If that email is registered, a reset link has been sent.",
   };
   if (!parsed.success) return genericSuccess;
+
+  // Stops this form being used to flood someone's inbox with reset emails.
+  const allowed = await consumeRateLimit(
+    `reset:${parsed.data.email.toLowerCase().trim()}`,
+    3,
+    60 * 60,
+  );
+  if (!allowed) return genericSuccess;
 
   const user = await getUserByEmail(parsed.data.email);
   if (!user || user.status !== "active") return genericSuccess;

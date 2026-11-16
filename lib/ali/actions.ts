@@ -88,13 +88,23 @@ export async function createEventAction(
   redirect(`/ali/${id}`);
 }
 
+/** Once shopping starts the list is locked: no more opting in/out or voting. */
+async function requireVotingOpen(eventId: string) {
+  const event = await getAliEvent(eventId);
+  if (!event || event.status !== "voting") {
+    throw new AuthError("Voting for this ALI is closed");
+  }
+}
+
 export async function toggleParticipationAction(eventId: string, optedIn: boolean) {
   const user = await requireUser();
+  await requireVotingOpen(eventId);
   await setParticipation(eventId, user.id, optedIn);
 }
 
 export async function setVoteAction(eventId: string, ingredientId: string, quantity: number) {
   const user = await requireUser();
+  await requireVotingOpen(eventId);
   const participation = await getParticipation(eventId, user.id);
   if (participation !== true) {
     throw new AuthError("Opt in to this ALI before voting on ingredients");
@@ -108,6 +118,10 @@ export async function addIngredientToEventAction(
   formData: FormData,
 ): Promise<ActionState> {
   const user = await requireUser();
+  const event = await getAliEvent(eventId);
+  if (!event || event.status !== "voting") {
+    return { error: "Voting for this ALI is closed." };
+  }
   const participation = await getParticipation(eventId, user.id);
   if (participation !== true) {
     return { error: "Opt in to this ALI before adding ingredients." };

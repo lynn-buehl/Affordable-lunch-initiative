@@ -88,9 +88,11 @@ export function ShoppingChecklist({
               onClick={() => toggle(item)}
               className={`${styles.item} ${item.checked ? styles.itemChecked : ""}`}
             >
-              <span className={styles.box}>
-                <Check size={18} strokeWidth={3} />
-              </span>
+              {readOnly && !item.checked ? null : (
+                <span className={styles.box}>
+                  <Check size={18} strokeWidth={3} />
+                </span>
+              )}
               <span className={styles.text}>
                 <span className={styles.name}>{item.name}</span>
                 <span className={styles.detail}>
