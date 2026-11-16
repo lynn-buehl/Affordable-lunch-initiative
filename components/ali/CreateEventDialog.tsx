@@ -30,7 +30,7 @@ export function CreateEventDialog() {
           <Plus size={16} /> New ALI
         </Button>
       </DialogTrigger>
-      <DialogContent title="Start a new ALI" description="You'll be the organizer.">
+      <DialogContent title="Start a new ALI" description="You'll be the organizer. Everyone gets an email asking whether they're in and what they want.">
         <form action={formAction} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {state?.error ? <FormMessage kind="error">{state.error}</FormMessage> : null}
           <TextField id="event-name" name="name" label="Name" placeholder="Fancy ALI" required autoFocus />

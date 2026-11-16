@@ -54,7 +54,7 @@ export function OrganizerControls({
           </DialogTrigger>
           <DialogContent
             title="Start shopping?"
-            description="Everyone who's opted in gets an email to vote before you go, and the ingredient list locks in for the shopping list."
+            description="Voting closes and the ingredient list locks in as your shopping list. Do this when you're about to head out."
           >
             <DialogActions>
               <DialogClose asChild>

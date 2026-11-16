@@ -13,7 +13,6 @@ import {
   completeEvent,
   cancelEvent,
   getParticipation,
-  getEmailsOfOptedInParticipants,
   getAliEvent,
   setShoppingCheck,
 } from "@/lib/db/queries/ali-events";
@@ -29,6 +28,7 @@ import {
 } from "@/lib/validation/ali";
 import { shoppingStartedEmailTemplate } from "@/lib/email/templates";
 import { appUrl, emailFrom, sendEmail } from "@/lib/email/resend";
+import { getAllUsers } from "@/lib/db/queries/users";
 import type { ActionState } from "@/lib/auth/actions";
 
 async function requireOrganizerOrAdmin(eventId: string) {
@@ -61,6 +61,30 @@ export async function createEventAction(
   }
 
   const id = await createAliEvent({ ...parsed.data, organizerId: user.id });
+
+  // Tell every active member right away, so they can opt in and pick their
+  // ingredients while voting is still open. Email is a supporting
+  // notification: a bad address or an unconfigured mail service must not
+  // stop the ALI from being created.
+  const { subject, html, text } = shoppingStartedEmailTemplate({
+    organizerName: user.name,
+    eventName: parsed.data.name,
+    eventUrl: `${appUrl()}/ali/${id}`,
+  });
+  const members = (await getAllUsers()).filter(
+    (member) => member.status === "active" && member.id !== user.id,
+  );
+  const results = await Promise.allSettled(
+    members.map((member) =>
+      sendEmail({ from: emailFrom(), to: member.email, subject, html, text }),
+    ),
+  );
+  for (const result of results) {
+    if (result.status === "rejected") {
+      console.error("Failed to send ALI invitation email:", result.reason);
+    }
+  }
+
   redirect(`/ali/${id}`);
 }
 
@@ -107,36 +131,9 @@ export async function addIngredientToEventAction(
 export async function startShoppingAction(eventId: string) {
   const user = await requireOrganizerOrAdmin(eventId);
 
-  const [event] = await db
-    .select({ name: aliEvents.name })
-    .from(aliEvents)
-    .where(eq(aliEvents.id, eventId))
-    .limit(1);
-  if (!event) return;
-
+  // Locks the list in. No email here: everyone was already asked to vote
+  // when the ALI was created, and voting is closed from this point on.
   await startShopping(eventId, user.id);
-
-  // The status transition (locking in the event for shopping) is the part
-  // that matters; email is a supporting notification. Don't let one bad
-  // address — or Resend being unconfigured — block the transition or stop
-  // the other participants' emails from sending.
-  const participants = await getEmailsOfOptedInParticipants(eventId);
-  const { subject, html, text } = shoppingStartedEmailTemplate({
-    organizerName: user.name,
-    eventName: event.name,
-    eventUrl: `${appUrl()}/ali/${eventId}`,
-  });
-
-  const results = await Promise.allSettled(
-    participants
-      .filter((p) => p.email !== user.email)
-      .map((p) => sendEmail({ from: emailFrom(), to: p.email, subject, html, text })),
-  );
-  for (const result of results) {
-    if (result.status === "rejected") {
-      console.error("Failed to send shopping-started email:", result.reason);
-    }
-  }
 }
 
 export async function completeEventAction(eventId: string) {
